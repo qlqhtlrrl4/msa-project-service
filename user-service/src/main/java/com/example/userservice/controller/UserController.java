@@ -13,19 +13,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
-@RequestMapping("/")
+@RequestMapping("/user-service")
 @RequiredArgsConstructor
 public class UserController {
     //case 1) env 사용
-    //private final Environment env;
+    private final Environment env;
     private final Greeting greeting;
     private final UserService userservice;
 
     @GetMapping("/health_check")
     public String status() {
 
-        return "It's Working in User Service";
+        return "It's Working in User Service Port : "+env.getProperty("local.server.port");
     }
 
     @GetMapping("/welcome")
@@ -48,5 +51,30 @@ public class UserController {
         return new ResponseEntity<>(responseUser,HttpStatus.CREATED);
     }
 
+    @GetMapping("/users")
+    public ResponseEntity<?> getUsers() {
+
+        List<UserDto> users = userservice.getUserByAll();
+        List<ResponseUser> result = new ArrayList<>();
+
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        users.forEach( u -> {
+            result.add(mapper.map(u, ResponseUser.class));
+        });
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<?> getUser(@PathVariable("userId")String userId) {
+
+        UserDto findUser = userservice.getUserByUserId(userId);
+
+        ResponseUser user = new ModelMapper().map(findUser, ResponseUser.class);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 
 }

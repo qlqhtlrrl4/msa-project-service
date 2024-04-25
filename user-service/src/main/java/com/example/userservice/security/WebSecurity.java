@@ -27,7 +27,7 @@ public class WebSecurity {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests((authz) -> authz
-                .requestMatchers(new AntPathRequestMatcher("/users/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/user-service/**")).permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll());
         http.headers(headers-> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         return http.build();
