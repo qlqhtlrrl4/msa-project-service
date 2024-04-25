@@ -12,38 +12,40 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/user-service/**
+            - Path=/user-service/login
+            - Method=POST
           filters:
-            - name: CustomFilter
-            - name: LoggingFilter
-              args:
-                baseMessage: Spring Cloud Gateway Logging Filter
-                preLogger: true
-                postLogger: true
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/users
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - name: AuthorizationHeaderFilter
 
         - id: catalog-service
           uri: lb://catalog-service
           predicates:
             - Path=/catalog-service/**
-          filters:
-            - name: CustomFilter
-            - name: LoggingFilter
-              args:
-                baseMessage: Spring Cloud Gateway Logging Filter
-                preLogger: true
-                postLogger: true
 
         - id: order-service
           uri: lb://order-service
           predicates:
             - Path=/order-service/**
-          filters:
-            - name: CustomFilter
-            - name: LoggingFilter
-              args:
-                baseMessage: Spring Cloud Gateway Logging Filter
-                preLogger: true
-                postLogger: true
 
       default-filters:
         - name: GlobalFilter
@@ -57,3 +59,7 @@ eureka:
     register-with-eureka: true
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+token:
+  secret: happilyeverafterhappilyeverafter
+
