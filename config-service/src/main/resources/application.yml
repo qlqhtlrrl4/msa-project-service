@@ -9,4 +9,5 @@ spring:
       server:
         git:
           #uri: file:///Users/junyounglee/project/jpa_study/section4/git-local-repo
-          uri: https://github.com/qlqhtlrrl4/msa-project-service/config-service
+          uri: https://github.com/qlqhtlrrl4/spring-cloud-config
+          
