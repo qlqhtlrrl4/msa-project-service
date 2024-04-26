@@ -51,13 +51,12 @@ public class WebSecurity {
         http.authorizeHttpRequests((authz) -> authz
 //                .requestMatchers(new AntPathRequestMatcher("/user-service/**")).permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/actuator/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/**"))
                 .access( new WebExpressionAuthorizationManager(
                         "hasIpAddress('127.0.0.1') or hasIpAddress('192.168.35.209')"
                         )
                 ).anyRequest().authenticated()
-
-
         ).authenticationManager(authenticationManager);
 
         //filter 추가

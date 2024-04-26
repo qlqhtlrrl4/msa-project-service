@@ -4,9 +4,15 @@ server:
 spring:
   application:
     name: apigateway-service
+  profiles:
+    active: prod
   main:
     web-application-type: reactive
+  config:
+    import: optional:configserver:http://localhost:8888 # ???? ??
   cloud:
+    config:
+      name: ecommerce # yml ??? ???
     gateway:
       routes:
         - id: user-service
@@ -23,6 +29,15 @@ spring:
           predicates:
             - Path=/user-service/users
             - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/actuator/**
+            - Method=GET, POST
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
@@ -60,6 +75,12 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
-token:
-  secret: happilyeverafterhappilyeverafter
+
+#token:
+#  secret: happilyeverafterhappilyeverafter
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, beans, health, httptrace
 

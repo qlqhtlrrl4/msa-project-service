@@ -1,6 +1,4 @@
 token:
   expiration_time: 86400000 # 1
-  secret: happilyeverafterhappilyeverafter
+  secret: wqeqwsadilyeverafterhappilyeverafter
 
-gateway:
-  ip: 192.168.35.209

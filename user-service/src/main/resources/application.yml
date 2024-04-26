@@ -2,6 +2,13 @@ server:
   port: 0
 
 spring:
+  profiles:
+    active: dev
+  cloud:
+    config:
+      name: ecommerce # yml ??? ???
+  config:
+    import: optional:configserver:http://localhost:8888 # ???? ??
   application:
     name: user-service
   datasource:
@@ -26,9 +33,15 @@ eureka:
 greeting:
   message: Welcome to the Simple E-commerce
 
-token:
-  expiration_time: 86400000 # 1? ??
-  secret: happilyeverafterhappilyeverafter
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans
+
+#token:
+#  expiration_time: 86400000 # 1? ??
+#  secret: happilyeverafterhappilyeverafter
 
 
 
