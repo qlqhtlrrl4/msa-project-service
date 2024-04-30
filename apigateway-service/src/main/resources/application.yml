@@ -4,8 +4,13 @@ server:
 spring:
   application:
     name: apigateway-service
-  profiles:
-    active: prod
+#  profiles:
+#    active: dev
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
   main:
     web-application-type: reactive
   config:
@@ -82,5 +87,5 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh, beans, health, httptrace
+        include: refresh, beans, health, httptrace, busrefresh
 

@@ -34,6 +34,8 @@ dependencies {
     implementation 'org.modelmapper:modelmapper:2.4.2'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.cloud:spring-cloud-starter-bus-amqp'
+
     testImplementation 'org.springframework.security:spring-security-test'
     implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
