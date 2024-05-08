@@ -1,12 +1,16 @@
 package com.example.userservice.service;
 
+import com.example.userservice.client.OrderServiceClient;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.entity.UserEntity;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.vo.ResponseOrder;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,11 +23,28 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
+@Slf4j
+//@RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+//    private final RestTemplate restTemplate;
+    private final Environment env;
+    private final OrderServiceClient orderServiceClient;
+
+    private final CircuitBreakerFactory circuitBreakerFactory;
+
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
+                           Environment env, OrderServiceClient orderServiceClient,
+                           CircuitBreakerFactory circuitBreakerFactory) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.env = env;
+        this.orderServiceClient = orderServiceClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
@@ -63,7 +84,43 @@ public class UserServiceImpl implements UserService{
         }
 
         UserDto userDto = new ModelMapper().map(result.get(), UserDto.class);
-        List<ResponseOrder> orders = new ArrayList<>();
+//        List<ResponseOrder> orders = new ArrayList<>();
+
+        /**
+         * 1. using as RestTemplate
+         */
+//        String orderUrl = String.format(env.getProperty("order-service.url"), userId);
+//
+//        ResponseEntity<List<ResponseOrder>> orderListResponse = restTemplate.exchange(
+//                orderUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<ResponseOrder>>() {
+//                });
+//
+//        userDto.setOrders(orderListResponse.getBody());
+
+        /**
+         * 2. using openfeign
+         */
+        //Feign Exception Handling
+//        List<ResponseOrder> orders = null;
+//        try {
+//            orders = orderServiceClient.getOrders(userId);
+//        } catch (FeignException e) {
+//            log.error(e.getMessage());
+//        }
+//
+//        userDto.setOrders(orders);
+
+        /**
+         * 3. errorDecoder 사용 try - catch 제거
+         */
+        //List<ResponseOrder> orders = orderServiceClient.getOrders(userId);
+        log.info("Before call orders microservice");
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
+
+        List<ResponseOrder> orders = circuitbreaker.run(() -> orderServiceClient.getOrders(userId),
+                throwable ->  new ArrayList<>());
+
+        log.info("After call orders microservice");
         userDto.setOrders(orders);
 
         return userDto;
